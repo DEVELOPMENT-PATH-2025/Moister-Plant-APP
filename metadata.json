@@ -1,0 +1,6 @@
+{
+  "name": "Nexus IoT Monitoring",
+  "description": "A futuristic dark-mode IoT monitoring system featuring real-time IR sensor detection and smart soil moisture analytics with glassmorphism UI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: nexus-iot-dashboard
+    env: static
+    buildCommand: none
+    publishPath: public

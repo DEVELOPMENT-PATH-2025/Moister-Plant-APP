@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus IoT | Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-space { font-family: 'Space+Grotesk', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#05070A] text-[#E2E8F0] min-h-screen overflow-x-hidden">
+    <!-- Animated Background Gradients -->
+    <div class="fixed inset-0 z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#00F2FF]/5 blur-[120px] animate-pulse"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[#39FF14]/5 blur-[120px] animate-pulse" style="animation-delay: 2s"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-screen">
+        <!-- Header -->
+        <header class="text-center mb-16 animate-in fade-in slide-in-from-top duration-1000">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#1E293B] bg-[#0A0E17] text-[#00F2FF] text-[10px] font-bold tracking-widest mb-4 uppercase">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00F2FF] opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-[#00F2FF]"></span>
+                </span>
+                X-Core System Active
+            </div>
+            <h1 class="text-5xl md:text-7xl font-space font-bold tracking-tighter text-white mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-[#64748B]">
+                Command Center
+            </h1>
+            <p class="text-[#94A3B8] text-lg max-w-2xl mx-auto font-light">
+                Synchronized with 12 remote nodes. Real-time telemetry and automated environment control.
+            </p>
+        </header>
+
+        <!-- Selection Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+            <!-- IR Sensor Card -->
+            <a href="ir-dashboard.html" class="glass-card group relative block p-8 hover:border-[#00F2FF]/30 transition-all duration-500 overflow-hidden glow-cyan">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-[#00F2FF]"><circle cx="12" cy="12" r="10"/><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z"/></svg>
+                </div>
+                
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-[#00F2FF]/10 flex items-center justify-center mb-6 border border-[#00F2FF]/20 shadow-[0_0_15px_rgba(0,242,255,0.2)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#00F2FF]"><circle cx="12" cy="12" r="10"/><path d="M17 12h.01"/><path d="M12 12h.01"/><path d="M7 12h.01"/></svg>
+                    </div>
+                    <div class="text-[#64748B] text-[10px] font-bold tracking-widest uppercase mb-2">Module 01</div>
+                    <h2 class="text-2xl font-space font-bold text-white mb-2">IR Detection Hub</h2>
+                    <p class="text-[#94A3B8] text-sm mb-6 font-light">
+                        Monitor infrared sensors for security, object presence, and activity logging with radar visualization.
+                    </p>
+                    <div class="flex items-center text-[#00F2FF] text-xs font-bold tracking-wider uppercase group-hover:translate-x-2 transition-transform">
+                        Launch System
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Soil Moisture Card -->
+            <a href="moisture-dashboard.html" class="glass-card group relative block p-8 hover:border-[#39FF14]/30 transition-all duration-500 overflow-hidden glow-green">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-[#39FF14]"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                </div>
+
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-[#39FF14]/10 flex items-center justify-center mb-6 border border-[#39FF14]/20 shadow-[0_0_15px_rgba(57,255,20,0.2)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#39FF14]"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                    </div>
+                    <div class="text-[#64748B] text-[10px] font-bold tracking-widest uppercase mb-2">Module 02</div>
+                    <h2 class="text-2xl font-space font-bold text-white mb-2">Bio-Moisture Lab</h2>
+                    <p class="text-[#94A3B8] text-sm mb-6 font-light">
+                        Optimize irrigation with soil moisture, temperature, and humidity sensors. Real-time pump automation.
+                    </p>
+                    <div class="flex items-center text-[#39FF14] text-xs font-bold tracking-wider uppercase group-hover:translate-x-2 transition-transform">
+                        Launch System
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-20 flex flex-col items-center">
+            <div class="w-full h-px bg-white/10 mb-8 max-w-4xl"></div>
+            <div class="flex gap-6 text-gray-500 text-xs font-mono uppercase tracking-widest">
+                <span>Core.v4.0.1</span>
+                <span>Active Nodes: 12</span>
+                <span>Latency: 14ms</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

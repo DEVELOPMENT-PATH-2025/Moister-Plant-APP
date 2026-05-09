@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus | Soil Moisture Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#05070A] text-[#E2E8F0] min-h-screen">
+    <!-- Sidebar -->
+    <aside class="sidebar fixed left-0 top-0 h-full w-20 backdrop-blur-3xl flex flex-col items-center py-8 z-50 transition-all duration-300 hover:w-64 group">
+        <a href="index.html" class="mb-12">
+            <div class="h-10 w-10 overflow-hidden relative group/logo">
+                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#39FF14" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+        </a>
+
+        <div class="flex flex-col gap-4 w-full px-4">
+            <a href="index.html" class="nav-item flex items-center p-3 rounded-lg text-[#94A3B8] hover:bg-white/5 hover:text-[#00F2FF]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span class="ml-4 font-space text-[13px] font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Global Overview</span>
+            </a>
+            <a href="ir-dashboard.html" class="nav-item flex items-center p-3 rounded-lg text-[#94A3B8] hover:bg-white/5 hover:text-[#00F2FF]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z"/></svg>
+                <span class="ml-4 font-space text-[13px] font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">IR Detection Hub</span>
+            </a>
+            <div class="nav-item active flex items-center p-3 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                <span class="ml-4 font-space text-[13px] font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Bio-Moisture Lab</span>
+            </div>
+        </div>
+
+        <div class="mt-auto p-4 w-full">
+            <div class="bg-white/5 p-4 rounded-xl border border-white/5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="text-[#64748B] text-[10px] font-bold tracking-widest uppercase mb-1">Plantation Age</div>
+                <div class="text-[#39FF14] font-mono text-xs tracking-tighter">142:12:08:44</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="pl-20 min-h-screen">
+        <header class="p-8 flex items-center justify-between border-b border-[#1E293B] bg-[#0A0E17]/50 backdrop-blur-md sticky top-0 z-40">
+            <div>
+                <h1 class="text-2xl font-space font-light text-white mb-1">Bio-Moisture Lab</h1>
+                <p class="text-[#94A3B8] text-xs">Node_8812 • Synthetic cultivation telemetry</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="flex flex-col items-end">
+                    <span class="text-[9px] text-[#64748B] font-bold tracking-widest uppercase">Pump Replica</span>
+                    <div class="flex items-center gap-2">
+                        <div id="pumpStatusDot" class="w-1.5 h-1.5 rounded-full bg-[#1E293B]"></div>
+                        <span id="pumpStatusText" class="text-[11px] font-bold tracking-wider text-[#64748B] uppercase">Standby</span>
+                    </div>
+                </div>
+                <div class="h-8 w-px bg-[#1E293B]"></div>
+                <button id="manualPumpTrigger" class="px-5 py-2 rounded-lg border border-[#39FF14]/30 text-[#39FF14] text-[11px] font-bold tracking-wider uppercase hover:bg-[#39FF14]/10 transition-all">Manual Overflow</button>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Main Metric Circular progress -->
+                <div class="lg:col-span-4 glass-card flex flex-col items-center glow-green h-[450px]">
+                    <h3 class="text-[10px] text-[#64748B] font-bold uppercase tracking-widest mb-10 w-full text-center">Moisture Saturation</h3>
+                    <div class="relative w-56 h-56 mb-8 flex items-center justify-center">
+                        <!-- Plant Illustration -->
+                        <div class="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="w-36 h-36 text-[#39FF14]">
+                                <path d="M12 22V12m0 0l-4-4m4 4l4-4M12 17l-3-3m3 3l3-3m-3-8V2"/>
+                                <path d="M7 10c0-3 2-5 5-5s5 2 5 5"/>
+                            </svg>
+                        </div>
+                        <svg class="w-full h-full transform -rotate-90">
+                            <circle cx="112" cy="112" r="100" stroke="currentColor" stroke-width="6" fill="transparent" class="text-white/5" />
+                            <circle id="moistureProgressCircle" cx="112" cy="112" r="100" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="628.32" stroke-dashoffset="628.32" class="text-[#39FF14] drop-shadow-[0_0_10px_rgba(57,255,20,0.5)] transition-all duration-1000" stroke-linecap="round" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="moistureValue" class="text-6xl font-space font-bold text-white tracking-tighter">0%</span>
+                            <span class="text-[9px] text-[#475569] uppercase font-bold tracking-widest mt-1">Capacitance Reading</span>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full mt-auto">
+                         <div class="flex justify-between items-center text-[10px] uppercase font-bold tracking-widest mb-2">
+                             <span class="text-[#475569]">Analysis</span>
+                             <span id="plantStatus" class="text-[#39FF14]">OPTIMAL</span>
+                         </div>
+                         <div class="h-1 w-full bg-[#1E293B] rounded-full overflow-hidden">
+                             <div id="statusIndicatorInner" class="h-full bg-[#39FF14] transition-all duration-500" style="width: 0%"></div>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Environmental Trio -->
+                <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card flex flex-col justify-between py-6">
+                         <div>
+                            <span class="text-[10px] text-[#64748B] font-bold uppercase tracking-widest">Thermodynamics</span>
+                            <div class="mt-4 flex items-baseline gap-1">
+                                <span id="tempValue" class="text-4xl font-space font-bold text-white tracking-tight">24.4</span>
+                                <span class="text-[#475569] font-space font-light text-xl">°C</span>
+                            </div>
+                         </div>
+                         <div class="mt-8 text-[9px] font-bold text-[#39FF14] bg-[#39FF14]/5 border border-[#39FF14]/10 py-1.5 px-3 rounded uppercase tracking-widest w-fit">In Range</div>
+                    </div>
+                    <div class="glass-card flex flex-col justify-between py-6">
+                         <div>
+                            <span class="text-[10px] text-[#64748B] font-bold uppercase tracking-widest">Ambient Humidity</span>
+                            <div class="mt-4 flex items-baseline gap-1">
+                                <span id="humidityValue" class="text-4xl font-space font-bold text-white tracking-tight">42</span>
+                                <span class="text-[#475569] font-space font-light text-xl">%</span>
+                            </div>
+                         </div>
+                         <div class="mt-8 text-[9px] font-bold text-[#64748B] bg-white/5 py-1.5 px-3 rounded uppercase tracking-widest w-fit">Calibrated</div>
+                    </div>
+                    <div class="glass-card flex flex-col justify-between py-6 relative overflow-hidden group">
+                         <div class="relative z-10">
+                            <span class="text-[10px] text-[#64748B] font-bold uppercase tracking-widest">Pump Controller</span>
+                            <div class="mt-4 text-xl font-space font-bold text-[#E2E8F0] tracking-wider" id="pumpDashboardStatus">OFFLINE</div>
+                         </div>
+                         <div id="pumpWave" class="absolute bottom-0 left-0 w-full h-8 bg-[#39FF14]/5 -translate-y-full transition-transform duration-1000 group-[.active]:translate-y-0">
+                            <svg viewBox="0 0 120 28" class="translate-y-[-100%] fill-[#39FF14]/10"><path d="M0 5c15 0 15 15 30 15s15-15 30-15 15 15 30 15 15-15 30-15v20H0z"/></svg>
+                         </div>
+                    </div>
+
+                    <!-- Chart -->
+                    <div class="md:col-span-3 glass-card h-[310px] flex flex-col">
+                         <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-[10px] text-[#64748B] font-bold uppercase tracking-widest">Saturation History</h3>
+                            <div class="flex gap-2">
+                                <span class="w-2 h-2 rounded-full bg-[#39FF14]"></span>
+                                <span class="text-[9px] text-[#475569] font-bold uppercase">Delta Values</span>
+                            </div>
+                         </div>
+                         <div class="flex-1 min-h-0">
+                             <canvas id="moistureChart"></canvas>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Plantation Log -->
+                <div class="lg:col-span-12 glass-card">
+                    <h3 class="text-[10px] text-[#64748B] font-bold uppercase tracking-widest mb-6">Hydration Registry</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="text-[10px] text-[#475569] font-bold uppercase tracking-widest border-b border-[#1E293B]">
+                                <tr>
+                                    <th class="pb-3">UTC_TIMESTAMP</th>
+                                    <th class="pb-3">INDEX_VALUE</th>
+                                    <th class="pb-3">SYSTEM_PROTOCOL</th>
+                                    <th class="pb-3">NODE_STATE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="moistureLogTable" class="text-[11px] font-medium text-[#94A3B8]">
+                                <!-- Data injected via app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Notification Overlay -->
+    <div id="notificationArea" class="fixed bottom-8 right-8 z-[100] flex flex-col gap-4 pointer-events-none"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
