@@ -39,33 +39,28 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * FEATURE 1: IR SENSOR DASHBOARD LOGIC
+ * FEATURE 1: IR SENSOR DASHBOARD LOGIC (REAL DATA)
  */
-function initIRDashboard() {
-    let detectionCount = 0;
-    let isSensorOn = true;
+async function initIRDashboard() {
+    let lastLocalCount = -1;
     const ctx = document.getElementById('activityChart')?.getContext('2d');
-    
-    // UI Elements
     const statusEl = document.getElementById('detectionStatus');
     const countEl = document.getElementById('detectionCount');
     const timeEl = document.getElementById('lastDetectionTime');
     const tableBody = document.getElementById('logTableBody');
     const pingEl = document.getElementById('detectionPing');
-    const toggleEl = document.getElementById('sensorToggle');
 
     if (!ctx) return;
 
-    // Chart Configuration
     const chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: Array(10).fill(''),
+            labels: Array(20).fill(''),
             datasets: [{
-                label: 'Signal Intensity',
-                data: Array(10).fill(0),
-                borderColor: '#06b6d4',
-                backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                label: 'Signal',
+                data: Array(20).fill(0),
+                borderColor: '#00F2FF',
+                backgroundColor: 'rgba(0, 242, 255, 0.05)',
                 borderWidth: 2,
                 tension: 0.4,
                 fill: true,
@@ -75,71 +70,56 @@ function initIRDashboard() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: {
-                y: { display: false, min: 0, max: 100 },
-                x: { display: false }
-            },
+            scales: { y: { display: false, min: 0, max: 100 }, x: { display: false } },
             plugins: { legend: { display: false } }
         }
     });
 
-    // Toggle logic
-    toggleEl?.addEventListener('change', (e) => {
-        isSensorOn = e.target.checked;
-        if (!isSensorOn) {
-            statusEl.textContent = "SYSTEM OFFLINE";
-            statusEl.className = "text-2xl font-space font-bold text-[#475569]";
-        }
-    });
+    setInterval(async () => {
+        try {
+            const res = await fetch('/api/ir/status');
+            const data = await res.json();
+            
+            const timestamp = new Date(data.lastUpdate).toLocaleTimeString();
+            const intensity = data.detected ? 85 : 15;
 
-    // Simulation Loop (Every 2 seconds)
-    setInterval(() => {
-        if (!isSensorOn) return;
+            chart.data.datasets[0].data.push(intensity);
+            chart.data.datasets[0].data.shift();
+            chart.update('none');
 
-        const isDetected = Math.random() > 0.7;
-        const timestamp = new Date().toLocaleTimeString();
-        const intensity = isDetected ? 70 + Math.random() * 30 : 10 + Math.random() * 20;
+            if (data.detected) {
+                statusEl.textContent = "OBJECT DETECTED";
+                statusEl.className = "text-2xl font-space font-bold text-red-500 animate-pulse";
+                pingEl.classList.remove('opacity-0');
+                if (data.count > lastLocalCount && lastLocalCount !== -1) {
+                    showNotice("Security Breach", "Unauthorized presence detected", "red");
+                    addLogEntry(tableBody, data.count, "NODE_HARDWARE", "0.99", "Live", timestamp);
+                }
+            } else {
+                statusEl.textContent = "SCANNING...";
+                statusEl.className = "text-2xl font-space font-bold text-[#00F2FF]";
+                pingEl.classList.add('opacity-0');
+            }
+            
+            if (lastLocalCount === -1 && data.count > 0) {
+                 for(let i=0; i<Math.min(data.count, 5); i++) {
+                    addLogEntry(tableBody, data.count - i, "HISTORY", "0.98", "Logged", "SYNC");
+                 }
+            }
 
-        // Update Chart
-        chart.data.datasets[0].data.push(intensity);
-        chart.data.datasets[0].data.shift();
-        chart.update('none');
-
-        if (isDetected) {
-            detectionCount++;
-            countEl.textContent = detectionCount;
+            lastLocalCount = data.count;
+            countEl.textContent = data.count;
             timeEl.textContent = timestamp;
-            statusEl.textContent = "OBJECT DETECTED";
-            statusEl.className = "text-2xl font-space font-bold text-red-500 animate-pulse";
-            
-            // Ping Animation
-            const x = Math.random() * 100;
-            const y = Math.random() * 100;
-            pingEl.style.left = `${x}%`;
-            pingEl.style.top = `${y}%`;
-            pingEl.classList.remove('opacity-0');
-            setTimeout(() => pingEl.classList.add('opacity-0'), 1000);
-
-            // Log entry: ID, Classification, Prob, Velocity, Time
-            addLogEntry(tableBody, detectionCount, "BIOMETRIC", "0.99", "2.4m/s", timestamp);
-            
-            // Notification
-            showNotice("Security Breach", "Unauthorized presence detected", "red");
-        } else {
-            statusEl.textContent = "SCANNING...";
-            statusEl.className = "text-2xl font-space font-bold text-[#00F2FF]";
-        }
-    }, 2000);
+        } catch (e) { console.error("Poll Error:", e); }
+    }, 1000);
 }
 
 /**
- * FEATURE 2: SOIL MOISTURE DASHBOARD LOGIC
+ * FEATURE 2: SOIL MOISTURE DASHBOARD LOGIC (REAL DATA)
  */
-function initMoistureDashboard() {
-    let isPumpOn = false;
+async function initMoistureDashboard() {
+    let lastUpdate = 0;
     const ctx = document.getElementById('moistureChart')?.getContext('2d');
-    
-    // UI Elements
     const moistureValEl = document.getElementById('moistureValue');
     const plantStatusEl = document.getElementById('plantStatus');
     const circleEl = document.getElementById('moistureProgressCircle');
@@ -154,14 +134,13 @@ function initMoistureDashboard() {
 
     if (!ctx) return;
 
-    // Chart Configuration
     const chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: Array(10).fill(''),
+            labels: Array(15).fill(''),
             datasets: [{
-                label: 'Saturation %',
-                data: Array(10).fill(45),
+                label: 'Moisture %',
+                data: Array(15).fill(45),
                 borderColor: '#39FF14',
                 borderWidth: 2,
                 tension: 0.4,
@@ -181,64 +160,39 @@ function initMoistureDashboard() {
         }
     });
 
-    // Pump Toggle
-    pumpTrigger?.addEventListener('click', () => {
-        isPumpOn = !isPumpOn;
-        updatePumpUI(isPumpOn, pumpDot, pumpText, pumpDashboardText, pumpTrigger);
-    });
+    setInterval(async () => {
+        try {
+            const res = await fetch('/api/moisture/status');
+            const data = await res.json();
 
-    // Simulation Loop (Every 3 seconds)
-    setInterval(() => {
-        // Natural depletion or pump replenishment
-        let currentMoisture = parseInt(moistureValEl.textContent);
-        if (isPumpOn) {
-            currentMoisture += 5;
-            if (currentMoisture >= 85) isPumpOn = false; // Auto shutoff
-        } else {
-            currentMoisture -= 1;
-        }
+            if (data.lastUpdate === lastUpdate) return;
+            lastUpdate = data.lastUpdate;
 
-        // Constraints
-        currentMoisture = Math.max(15, Math.min(95, currentMoisture));
-        
-        // Update UI
-        moistureValEl.textContent = `${currentMoisture}%`;
-        tempEl.textContent = (22 + Math.random() * 4).toFixed(1);
-        humEl.textContent = (50 + Math.random() * 20).toFixed(0);
+            moistureValEl.textContent = `${data.moisture}%`;
+            tempEl.textContent = data.temp.toFixed(1);
+            humEl.textContent = data.humidity;
 
-        // Progress Circle (circumference ~628.32 for r=100)
-        const offset = 628.32 - (currentMoisture / 100) * 628.32;
-        circleEl.style.strokeDashoffset = offset;
-        innerStatusEl.style.width = `${currentMoisture}%`;
+            const offset = 628.32 - (data.moisture / 100) * 628.32;
+            circleEl.style.strokeDashoffset = offset;
+            innerStatusEl.style.width = `${data.moisture}%`;
 
-        // Plant Status
-        if (currentMoisture < 30) {
-            plantStatusEl.textContent = "CRITICAL";
-            plantStatusEl.className = "text-[#ff4444]";
-            innerStatusEl.className = "h-full bg-red-500 transition-all duration-500";
-            showNotice("Water Deficiency", "Moisture below 30% threshold", "red");
-            if (!isPumpOn) {
-                 isPumpOn = true; // Auto-irrigation simulation
-                 addLogEvent(tableBody, currentMoisture, "AUTO_FLUSH", "RECOV_MODE");
+            if (data.moisture < 30) {
+                plantStatusEl.textContent = "CRITICAL";
+                plantStatusEl.className = "text-[#ff4444]";
+                showNotice("Hydration Alert", "Soil moisture critical", "red");
+            } else {
+                plantStatusEl.textContent = "OPTIMAL";
+                plantStatusEl.className = "text-[#39FF14]";
             }
-        } else if (currentMoisture > 80) {
-            plantStatusEl.textContent = "SATURATED";
-            plantStatusEl.className = "text-[#00F2FF]";
-            innerStatusEl.className = "h-full bg-[#00F2FF] transition-all duration-500";
-        } else {
-            plantStatusEl.textContent = "OPTIMAL";
-            plantStatusEl.className = "text-[#39FF14]";
-            innerStatusEl.className = "h-full bg-[#39FF14] transition-all duration-500";
-        }
 
-        updatePumpUI(isPumpOn, pumpDot, pumpText, pumpDashboardText, pumpTrigger);
+            updatePumpUI(data.pump, pumpDot, pumpText, pumpDashboardText, pumpTrigger);
+            addLogEvent(tableBody, data.moisture, data.pump ? "PUMP_ON" : "STABLE", "SYNCED");
 
-        // Chart Update
-        chart.data.datasets[0].data.push(currentMoisture);
-        chart.data.datasets[0].data.shift();
-        chart.update('none');
-
-    }, 3000);
+            chart.data.datasets[0].data.push(data.moisture);
+            chart.data.datasets[0].data.shift();
+            chart.update('none');
+        } catch (e) { console.error("Poll Error:", e); }
+    }, 1500);
 }
 
 // Utility Helpers
